@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Maintenance Server</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      overflow: hidden;
+      background: #0a0f1e;
+      font-family: 'Segoe UI', Roboto, system-ui, -apple-system, sans-serif;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+    }
+
+    #rainCanvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    .overlay {
+      position: relative;
+      z-index: 1;
+      background: rgba(10, 15, 30, 0.45);
+      backdrop-filter: blur(12px) brightness(0.8);
+      -webkit-backdrop-filter: blur(12px) brightness(0.8);
+      border-radius: 2rem;
+      padding: 3rem 4.5rem;
+      max-width: 780px;
+      width: 90%;
+      text-align: center;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(255, 255, 255, 0.05);
+      animation: floatIn 1.2s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+      transform: translateY(30px);
+      opacity: 0;
+    }
+
+    @keyframes floatIn {
+      0% { opacity: 0; transform: translateY(30px) scale(0.96); }
+      100% { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .overlay h1 {
+      font-size: 3.2rem;
+      font-weight: 700;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      background: linear-gradient(135deg, #f0f4ff, #b0caff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 0.6rem;
+      text-shadow: 0 0 30px rgba(100, 150, 255, 0.3);
+      animation: pulseGlow 3s ease-in-out infinite alternate;
+    }
+
+    @keyframes pulseGlow {
+      0% { text-shadow: 0 0 20px rgba(100, 150, 255, 0.2); }
+      100% { text-shadow: 0 0 50px rgba(100, 150, 255, 0.6); }
+    }
+
+    .overlay .sub {
+      font-size: 1.3rem;
+      font-weight: 300;
+      letter-spacing: 2px;
+      color: rgba(255, 255, 255, 0.85);
+      margin-bottom: 1.8rem;
+      line-height: 1.6;
+      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+    }
+
+    .overlay .sub span {
+      display: inline-block;
+      animation: flicker 2.4s infinite alternate;
+    }
+
+    @keyframes flicker {
+      0% { opacity: 0.7; }
+      100% { opacity: 1; }
+    }
+
+    .dots::after {
+      content: '...';
+      animation: dotAnim 1.8s steps(4, end) infinite;
+    }
+
+    @keyframes dotAnim {
+      0% { content: ''; }
+      25% { content: '.'; }
+      50% { content: '..'; }
+      75% { content: '...'; }
+    }
+
+    .icon-server {
+      font-size: 3.6rem;
+      margin-bottom: 0.6rem;
+      display: block;
+      filter: drop-shadow(0 0 20px rgba(100, 180, 255, 0.5));
+      animation: spinSlow 12s linear infinite;
+    }
+
+    @keyframes spinSlow {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .mute-btn {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      z-index: 10;
+      background: rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(6px);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: #fff;
+      padding: 10px 16px;
+      border-radius: 40px;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: all 0.3s;
+      font-family: inherit;
+      letter-spacing: 0.5px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .mute-btn:hover {
+      background: rgba(255, 255, 255, 0.18);
+      border-color: rgba(255, 255, 255, 0.3);
+    }
+
+    @media (max-width: 600px) {
+      .overlay {
+        padding: 2rem 1.8rem;
+      }
+      .overlay h1 {
+        font-size: 2.2rem;
+      }
+      .overlay .sub {
+        font-size: 1rem;
+      }
+      .icon-server {
+        font-size: 2.6rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <canvas id="rainCanvas"></canvas>
+
+  <div class="overlay">
+    <span class="icon-server">️😥</span>
+    <h1>Maintenance Server</h1>
+    <div class="sub">
+      Harap tunggu, server kami sedang dalam perbaikan dan penyempurnaan
+      <span class="dots"></span>
+    </div>
+    <div style="font-size:0.9rem; opacity:0.5; margin-top:0.8rem; letter-spacing:1px;">
+      Kami akan segera kembali
+      hubungi nomor 085731569186
+    </div>
+  </div>
+
+  <button class="mute-btn" id="muteBtn">🤡 Suara</button>
+
+  <script>
+    (function() {
+      "use strict";
+
+      // ---------- MUSIK (HTML5 Audio) ----------
+      const audio = new Audio('musicku.mp3');
+      audio.loop = true;
+      audio.volume = 0.3; // volume 30%
+      let isMuted = false;
+
+      function toggleMute() {
+        if (audio.paused && !isMuted) {
+          // jika sedang pause dan kita unmute, coba play
+          audio.play().catch(e => console.warn('Gagal memutar audio:', e));
+        } else {
+          isMuted = !isMuted;
+          if (isMuted) {
+            audio.pause();
+          } else {
+            audio.play().catch(e => console.warn('Gagal memutar audio:', e));
+          }
+        }
+        updateMuteBtn();
+      }
+
+      function updateMuteBtn() {
+        const btn = document.getElementById('muteBtn');
+        if (isMuted || audio.paused) {
+          btn.innerHTML = '🔇 Suara';
+        } else {
+          btn.innerHTML = '🔊 Suara';
+        }
+      }
+
+      // Tombol mute
+      document.getElementById('muteBtn').addEventListener('click', toggleMute);
+
+      // Inisialisasi audio saat user berinteraksi (kebijakan autoplay)
+      function initAudio() {
+        if (!audio.paused) return; // sudah berjalan
+        audio.play().then(() => {
+          isMuted = false;
+          updateMuteBtn();
+        }).catch(e => {
+          console.warn('Autoplay dicegah, klik halaman untuk memutar musik.');
+        });
+      }
+
+      document.addEventListener('click', initAudio, { once: true });
+      // Jika user sudah klik, kita tetap perbarui tombol
+      document.addEventListener('click', function() {
+        updateMuteBtn();
+      });
+
+      // ---------- HUJAN (Canvas) ----------
+      const canvas = document.getElementById('rainCanvas');
+      const ctx = canvas.getContext('2d');
+
+      let width, height;
+      let droplets = [];
+
+      function resizeCanvas() {
+        width = canvas.width = window.innerWidth;
+        height = canvas.height = window.innerHeight;
+      }
+      window.addEventListener('resize', resizeCanvas);
+      resizeCanvas();
+
+      const DROPLET_COUNT = 220;
+      const WIND = 0.8;
+
+      class Droplet {
+        constructor() {
+          this.reset();
+        }
+        reset() {
+          this.x = Math.random() * width;
+          this.y = Math.random() * height - height;
+          this.length = 12 + Math.random() * 20;
+          this.speed = 8 + Math.random() * 12;
+          this.opacity = 0.2 + Math.random() * 0.4;
+          this.width = 1.2 + Math.random() * 1.8;
+        }
+        update() {
+          this.y += this.speed;
+          this.x += WIND * 0.6;
+          if (this.y > height + 30) {
+            this.reset();
+            this.y = -20 - Math.random() * 60;
+          }
+          if (this.x > width + 30) this.x = -30;
+          if (this.x < -30) this.x = width + 30;
+        }
+        draw() {
+          ctx.beginPath();
+          ctx.moveTo(this.x, this.y);
+          ctx.lineTo(this.x + WIND * 2.5, this.y + this.length);
+          ctx.strokeStyle = `rgba(180, 210, 255, ${this.opacity})`;
+          ctx.lineWidth = this.width;
+          ctx.lineCap = 'round';
+          ctx.stroke();
+        }
+      }
+
+      for (let i = 0; i < DROPLET_COUNT; i++) {
+        const d = new Droplet();
+        d.y = Math.random() * height;
+        droplets.push(d);
+      }
+
+      function drawFog() {
+        const gradient = ctx.createRadialGradient(
+          width * 0.5, height * 0.5, 100,
+          width * 0.5, height * 0.5, Math.max(width, height) * 0.8
+        );
+        gradient.addColorStop(0, 'rgba(150, 190, 255, 0.02)');
+        gradient.addColorStop(1, 'rgba(10, 15, 30, 0.15)');
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, width, height);
+      }
+
+      function animateRain() {
+        ctx.clearRect(0, 0, width, height);
+        ctx.fillStyle = '#0a0f1e';
+        ctx.fillRect(0, 0, width, height);
+
+        for (const d of droplets) {
+          d.update();
+          d.draw();
+        }
+
+        drawFog();
+
+        if (Math.random() < 0.002) {
+          ctx.fillStyle = 'rgba(200, 220, 255, 0.06)';
+          ctx.fillRect(0, 0, width, height);
+        }
+
+        requestAnimationFrame(animateRain);
+      }
+
+      animateRain();
+
+      // Perbarui tombol saat halaman dimuat
+      updateMuteBtn();
+    })();
+  </script>
+</body>
+  </html>
