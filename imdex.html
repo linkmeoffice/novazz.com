@@ -1,0 +1,1283 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Novazz Novel</title>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+    <!-- Mammoth.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+    <style>
+        /* ---------- RESET & VARIABEL ---------- */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-body: #f5f0eb;
+            --bg-card: #ffffff;
+            --bg-nav: #ffffffcc;
+            --bg-nav-blur: blur(12px);
+            --text-primary: #2c2c2c;
+            --text-secondary: #5a5a5a;
+            --text-muted: #8a8a8a;
+            --border-color: #e0d6ce;
+            --shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+            --shadow-hover: 0 12px 48px rgba(0, 0, 0, 0.15);
+            --radius: 20px;
+            --radius-sm: 12px;
+            --transition: 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            --accent: #c0392b;
+            --accent-hover: #a93226;
+            --grid-gap: 28px;
+            --max-width: 1400px;
+            --font: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            --modal-overlay: rgba(0, 0, 0, 0.6);
+            --input-bg: #ffffff;
+            --input-border: #d0c8c0;
+        }
+
+        [data-theme="dark"] {
+            --bg-body: #1a1a1e;
+            --bg-card: #28282e;
+            --bg-nav: #1f1f24cc;
+            --text-primary: #ececec;
+            --text-secondary: #b0b0b8;
+            --text-muted: #7a7a82;
+            --border-color: #3a3a42;
+            --shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+            --shadow-hover: 0 12px 48px rgba(0, 0, 0, 0.7);
+            --accent: #e74c3c;
+            --accent-hover: #c0392b;
+            --modal-overlay: rgba(0, 0, 0, 0.8);
+            --input-bg: #2c2c32;
+            --input-border: #4a4a52;
+        }
+
+        body {
+            font-family: var(--font);
+            background: var(--bg-body);
+            color: var(--text-primary);
+            transition: background var(--transition), color var(--transition);
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        a {
+            text-decoration: none;
+            color: inherit;
+        }
+
+        /* ---------- NAVBAR ---------- */
+        .navbar {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: var(--bg-nav);
+            backdrop-filter: var(--bg-nav-blur);
+            -webkit-backdrop-filter: var(--bg-nav-blur);
+            border-bottom: 1px solid var(--border-color);
+            padding: 0 24px;
+            height: 72px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: background var(--transition), border-color var(--transition);
+        }
+
+        .navbar .brand {
+            font-size: 1.5rem;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .navbar .brand i {
+            color: var(--accent);
+            font-size: 1.6rem;
+        }
+
+        .navbar .brand span {
+            background: linear-gradient(135deg, var(--accent), #e67e22);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .navbar .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .navbar .nav-links button {
+            background: none;
+            border: none;
+            padding: 8px 18px;
+            border-radius: 50px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            cursor: pointer;
+            color: var(--text-secondary);
+            transition: all var(--transition);
+            position: relative;
+        }
+
+        .navbar .nav-links button:hover {
+            color: var(--text-primary);
+            background: var(--border-color);
+        }
+
+        .navbar .nav-links button.active {
+            color: var(--accent);
+            background: rgba(192, 57, 43, 0.10);
+        }
+
+        .navbar .nav-links button.active::after {
+            content: '';
+            position: absolute;
+            bottom: 4px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 20px;
+            height: 3px;
+            border-radius: 3px;
+            background: var(--accent);
+        }
+
+        .navbar .nav-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .theme-toggle {
+            background: var(--border-color);
+            border: none;
+            border-radius: 50px;
+            width: 48px;
+            height: 28px;
+            cursor: pointer;
+            position: relative;
+            transition: background var(--transition);
+            flex-shrink: 0;
+        }
+
+        .theme-toggle .thumb {
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: white;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+            transition: transform var(--transition), background var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+        }
+
+        [data-theme="dark"] .theme-toggle {
+            background: #3a3a42;
+        }
+
+        [data-theme="dark"] .theme-toggle .thumb {
+            transform: translateX(20px);
+            background: #2c2c32;
+            color: #f1c40f;
+        }
+
+        .theme-toggle .thumb i {
+            font-size: 12px;
+            color: inherit;
+        }
+
+        /* ---------- HERO ---------- */
+        .hero {
+            text-align: center;
+            padding: 48px 24px 32px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .hero h1 {
+            font-size: 2.6rem;
+            font-weight: 800;
+            letter-spacing: -1px;
+            background: linear-gradient(135deg, var(--accent), #e67e22);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero p {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            margin-top: 8px;
+        }
+
+        /* ---------- KONTEN ---------- */
+        .container {
+            max-width: var(--max-width);
+            margin: 0 auto;
+            padding: 0 24px 60px;
+        }
+
+        /* ---------- SEARCH BAR ---------- */
+        .search-bar {
+            display: flex;
+            align-items: center;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 50px;
+            padding: 0 20px;
+            margin: 20px 0 30px;
+            max-width: 500px;
+            transition: all var(--transition);
+            box-shadow: var(--shadow);
+        }
+
+        .search-bar:focus-within {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(192, 57, 43, 0.15);
+        }
+
+        .search-bar i {
+            color: var(--text-muted);
+            font-size: 1rem;
+            margin-right: 12px;
+        }
+
+        .search-bar input {
+            border: none;
+            background: transparent;
+            padding: 14px 0;
+            width: 100%;
+            font-size: 1rem;
+            color: var(--text-primary);
+            outline: none;
+        }
+
+        .search-bar input::placeholder {
+            color: var(--text-muted);
+        }
+
+        /* ---------- YOUTUBE PLAYER ---------- */
+        .youtube-player {
+            background: var(--bg-card);
+            border-radius: var(--radius);
+            padding: 24px 28px;
+            margin: 20px 0 30px;
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow);
+            transition: all var(--transition);
+        }
+
+        .youtube-player h3 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 14px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--accent);
+        }
+
+        .youtube-player .youtube-input {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .youtube-player .youtube-input input {
+            flex: 1;
+            min-width: 200px;
+            padding: 12px 18px;
+            border-radius: 50px;
+            border: 1px solid var(--border-color);
+            background: var(--input-bg);
+            color: var(--text-primary);
+            font-size: 0.95rem;
+            transition: border var(--transition);
+            outline: none;
+        }
+
+        .youtube-player .youtube-input input:focus {
+            border-color: var(--accent);
+        }
+
+        .youtube-player .youtube-input button {
+            padding: 12px 28px;
+            border: none;
+            border-radius: 50px;
+            background: var(--accent);
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.95rem;
+            white-space: nowrap;
+        }
+
+        .youtube-player .youtube-input button:hover {
+            background: var(--accent-hover);
+        }
+
+        .youtube-container {
+            margin-top: 18px;
+            position: relative;
+            padding-bottom: 56.25%;
+            height: 0;
+            overflow: hidden;
+            border-radius: var(--radius-sm);
+            background: #000;
+        }
+
+        .youtube-container iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: 0;
+        }
+
+        .youtube-container.hidden {
+            display: none;
+        }
+
+        /* ---------- GRID NOVEL ---------- */
+        .novel-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: var(--grid-gap);
+            margin-top: 12px;
+        }
+
+        .novel-card {
+            background: var(--bg-card);
+            border-radius: var(--radius);
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            transition: all var(--transition);
+            cursor: pointer;
+            border: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .novel-card:hover {
+            transform: translateY(-6px);
+            box-shadow: var(--shadow-hover);
+            border-color: var(--accent);
+        }
+
+        .novel-card .cover {
+            position: relative;
+            aspect-ratio: 2 / 3;
+            overflow: hidden;
+            background: var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .novel-card .cover img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform var(--transition);
+        }
+
+        .novel-card:hover .cover img {
+            transform: scale(1.03);
+        }
+
+        .novel-card .cover .placeholder {
+            font-size: 3rem;
+            color: var(--text-muted);
+            opacity: 0.5;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .novel-card .cover .placeholder i {
+            font-size: 3.6rem;
+        }
+        .novel-card .cover .placeholder span {
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .novel-card .info {
+            padding: 14px 16px 16px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .novel-card .info .title {
+            font-weight: 600;
+            font-size: 0.95rem;
+            color: var(--text-primary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .novel-card .info .badge {
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--accent);
+            background: rgba(192, 57, 43, 0.08);
+            padding: 2px 10px;
+            border-radius: 50px;
+            display: inline-block;
+            width: fit-content;
+        }
+
+        .novel-card .info .meta {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 6px;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .novel-card .info .meta i {
+            margin-right: 4px;
+        }
+
+        /* ---------- TENTANG ---------- */
+        .about-section {
+            max-width: 780px;
+            margin: 20px auto 0;
+            padding: 40px 32px;
+            background: var(--bg-card);
+            border-radius: var(--radius);
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow);
+            transition: all var(--transition);
+        }
+
+        .about-section h2 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .about-section h2 i {
+            color: var(--accent);
+        }
+
+        .about-section p {
+            color: var(--text-secondary);
+            font-size: 1.05rem;
+            margin-bottom: 14px;
+            line-height: 1.8;
+        }
+
+        .about-section .stats {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 24px 48px;
+            margin-top: 24px;
+            padding-top: 24px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .about-section .stats .stat-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .about-section .stats .stat-item .number {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--accent);
+        }
+
+        .about-section .stats .stat-item .label {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        /* ---------- EMPTY ---------- */
+        .empty-state {
+            text-align: center;
+            padding: 60px 24px;
+            color: var(--text-muted);
+        }
+
+        .empty-state i {
+            font-size: 4rem;
+            opacity: 0.3;
+            margin-bottom: 16px;
+            display: block;
+        }
+
+        .empty-state h3 {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 6px;
+        }
+
+        .empty-state p {
+            font-size: 0.95rem;
+        }
+
+        /* ---------- MODAL PEMBACA ---------- */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--modal-overlay);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 999;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+            padding: 20px;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-box {
+            background: var(--bg-card);
+            border-radius: var(--radius);
+            max-width: 900px;
+            width: 100%;
+            max-height: 90vh;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.5);
+            border: 1px solid var(--border-color);
+            transform: scale(0.95);
+            transition: transform 0.3s ease;
+            overflow: hidden;
+        }
+
+        .modal-overlay.active .modal-box {
+            transform: scale(1);
+        }
+
+        .modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 24px;
+            border-bottom: 1px solid var(--border-color);
+            flex-shrink: 0;
+        }
+
+        .modal-header h3 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .modal-header h3 i {
+            color: var(--accent);
+        }
+
+        .modal-header .modal-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .modal-header .modal-actions button {
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            cursor: pointer;
+            color: var(--text-secondary);
+            transition: color var(--transition);
+            padding: 4px 8px;
+            border-radius: 6px;
+        }
+
+        .modal-header .modal-actions button:hover {
+            color: var(--text-primary);
+            background: var(--border-color);
+        }
+
+        .modal-body {
+            padding: 24px 32px;
+            overflow-y: auto;
+            flex: 1;
+            color: var(--text-primary);
+            line-height: 1.8;
+        }
+
+        .modal-body .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 40px 0;
+            gap: 12px;
+            color: var(--text-muted);
+        }
+
+        .modal-body .loading i {
+            font-size: 2rem;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .modal-body .content {
+            font-size: 1rem;
+        }
+
+        .modal-body .content h1,
+        .modal-body .content h2,
+        .modal-body .content h3 {
+            margin-top: 1.2em;
+            margin-bottom: 0.6em;
+        }
+
+        .modal-body .content p {
+            margin-bottom: 0.8em;
+        }
+
+        .modal-body .content img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        .modal-body .error-msg {
+            color: var(--accent);
+            text-align: center;
+            padding: 20px;
+        }
+
+        /* ---------- ANIMASI KARTU ---------- */
+        .novel-card {
+            opacity: 0;
+            transform: translateY(30px);
+            animation: fadeUp 0.6s ease forwards;
+        }
+
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* ---------- RESPONSIVE ---------- */
+        @media (max-width: 768px) {
+            .navbar {
+                padding: 0 16px;
+                height: 64px;
+                flex-wrap: wrap;
+            }
+            .navbar .brand {
+                font-size: 1.2rem;
+            }
+            .navbar .nav-links button {
+                padding: 6px 12px;
+                font-size: 0.85rem;
+            }
+            .navbar .nav-actions .theme-toggle {
+                width: 40px;
+                height: 24px;
+            }
+            .navbar .nav-actions .theme-toggle .thumb {
+                width: 18px;
+                height: 18px;
+                top: 3px;
+                left: 3px;
+                font-size: 10px;
+            }
+            [data-theme="dark"] .theme-toggle .thumb {
+                transform: translateX(16px);
+            }
+
+            .hero h1 {
+                font-size: 1.8rem;
+            }
+            .hero p {
+                font-size: 0.95rem;
+            }
+
+            .novel-grid {
+                grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+                gap: 16px;
+            }
+
+            .novel-card .info .title {
+                font-size: 0.85rem;
+            }
+
+            .about-section {
+                padding: 24px 18px;
+            }
+            .about-section h2 {
+                font-size: 1.4rem;
+            }
+            .about-section .stats {
+                gap: 16px 32px;
+            }
+            .about-section .stats .stat-item .number {
+                font-size: 1.4rem;
+            }
+
+            .container {
+                padding: 0 12px 40px;
+            }
+
+            .modal-box {
+                max-height: 95vh;
+            }
+            .modal-body {
+                padding: 16px 18px;
+            }
+            .modal-header {
+                padding: 12px 16px;
+            }
+
+            .youtube-player {
+                padding: 16px 18px;
+            }
+            .youtube-player .youtube-input input {
+                min-width: 150px;
+            }
+            .search-bar {
+                max-width: 100%;
+                margin: 12px 0 20px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .navbar .brand {
+                font-size: 1rem;
+            }
+            .navbar .brand i {
+                font-size: 1.2rem;
+            }
+            .navbar .nav-links button {
+                font-size: 0.75rem;
+                padding: 4px 10px;
+            }
+            .novel-grid {
+                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+                gap: 12px;
+            }
+            .novel-card .info {
+                padding: 10px 12px 12px;
+            }
+            .novel-card .info .title {
+                font-size: 0.78rem;
+            }
+            .novel-card .info .badge {
+                font-size: 0.6rem;
+                padding: 1px 8px;
+            }
+            .novel-card .info .meta {
+                font-size: 0.65rem;
+            }
+        }
+
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ======== NAVBAR ======== -->
+    <nav class="navbar">
+        <div class="brand">
+            <i class="fas fa-book-open"></i>
+            <span>Novazz | AalCode</span>
+        </div>
+
+        <div class="nav-links">
+            <button id="btnHome" class="active" data-page="home">
+                <i class="fas fa-home"></i> Beranda
+            </button>
+            <button id="btnAbout" data-page="about">
+                <i class="fas fa-info-circle"></i> Tentang
+            </button>
+        </div>
+
+        <div class="nav-actions">
+            <button class="theme-toggle" id="themeToggle" aria-label="Toggle tema">
+                <span class="thumb">
+                    <i class="fas fa-sun"></i>
+                </span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- ======== HERO ======== -->
+    <div class="hero" id="hero">
+        <h1>📖 Koleksi Novel</h1>
+        <p>Klik sampul untuk membaca langsung di website. Cari novel atau putar music YouTube di bawah.</p>
+    </div>
+
+    <!-- ======== KONTEN ======== -->
+    <div class="container" id="mainContainer">
+
+        <!-- ===== BERANDA ===== -->
+        <div id="pageHome">
+
+            <!-- Pencarian Novel -->
+            <div class="search-bar">
+                <i class="fas fa-search"></i>
+                <input type="text" id="searchInput" placeholder="Cari judul novel..." />
+            </div>
+
+            <!-- Pemutar YouTube -->
+            <div class="youtube-player">
+                <h3><i class="fab fa-youtube"></i> Putar Music YouTube - dengan url</h3>
+                <div class="youtube-input">
+                    <input type="text" id="youtubeUrl" placeholder="Masukkan URL YouTube (contoh: https://www.youtube.com/watch?v=...)" />
+                    <button id="youtubePlay"><i class="fas fa-play"></i> Putar</button>
+                </div>
+                <div id="youtubeContainer" class="youtube-container hidden">
+                    <iframe id="youtubeIframe" src="" allowfullscreen></iframe>
+                </div>
+            </div>
+
+            <!-- Grid Novel -->
+            <div class="novel-grid" id="novelGrid">
+                <!-- Diisi JavaScript -->
+            </div>
+            <div class="empty-state hidden" id="emptyState">
+                <i class="fas fa-book"></i>
+                <h3>Belum ada novel</h3>
+                <p>Taruh file dengan format <strong>novel1.docx</strong> dan <strong>novel1.jpg</strong> di folder yang sama.</p>
+            </div>
+        </div>
+
+        <!-- ===== TENTANG ===== -->
+        <div id="pageAbout" class="hidden">
+            <div class="about-section">
+                <h2><i class="fas fa-address-card"></i> Tentang Kami</h2>
+                <p>
+                    <strong>Novazz Novel</strong> adalah platform digital sederhana untuk menyimpan dan
+                    menikmati koleksi novel favoritmu. Dibangun dengan semangat berbagi cerita,
+                    kami percaya bahwa setiap halaman menyimpan dunia baru.
+                </p>
+                <p>
+                    Website ini otomatis mendeteksi file <code>.docx</code> dan sampul
+                    <code>.jpg</code> yang kamu taruh di direktori yang sama. Cukup beri nama
+                    <strong>novel1.docx</strong>, <strong>novel1.jpg</strong>, dan seterusnya.
+                    Klik kartu untuk membaca isi novel langsung di layar.
+                </p>
+                <div class="stats">
+                    <div class="stat-item">
+                        <span class="number" id="totalNovels">0</span>
+                        <span class="label">Total Novel</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="number">∞</span>
+                        <span class="label">Cerita Tak Terbatas</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="number"><i class="fas fa-moon"></i> / <i class="fas fa-sun"></i></span>
+                        <span class="label">Mode Terang / Gelap</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ======== MODAL PEMBACA ======== -->
+    <div class="modal-overlay" id="novelModal">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h3><i class="fas fa-book-open"></i> <span id="modalTitle">Novel</span></h3>
+                <div class="modal-actions">
+                    <button id="modalDownload" title="Download file"><i class="fas fa-download"></i></button>
+                    <button id="modalClose" title="Tutup"><i class="fas fa-times"></i></button>
+                </div>
+            </div>
+            <div class="modal-body" id="modalBody">
+                <div class="loading">
+                    <i class="fas fa-spinner"></i> Memuat konten...
+                </div>
+                <div class="content hidden"></div>
+                <div class="error-msg hidden"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ======== JAVASCRIPT ======== -->
+    <script>
+        (function() {
+            'use strict';
+
+            // ---------- ELEMEN ----------
+            const grid = document.getElementById('novelGrid');
+            const empty = document.getElementById('emptyState');
+            const btnHome = document.getElementById('btnHome');
+            const btnAbout = document.getElementById('btnAbout');
+            const pageHome = document.getElementById('pageHome');
+            const pageAbout = document.getElementById('pageAbout');
+            const hero = document.getElementById('hero');
+            const themeToggle = document.getElementById('themeToggle');
+            const totalSpan = document.getElementById('totalNovels');
+            const searchInput = document.getElementById('searchInput');
+
+            // YouTube
+            const youtubeUrl = document.getElementById('youtubeUrl');
+            const youtubePlay = document.getElementById('youtubePlay');
+            const youtubeContainer = document.getElementById('youtubeContainer');
+            const youtubeIframe = document.getElementById('youtubeIframe');
+
+            // Modal
+            const modal = document.getElementById('novelModal');
+            const modalTitle = document.getElementById('modalTitle');
+            const modalBody = document.getElementById('modalBody');
+            const modalLoading = modalBody.querySelector('.loading');
+            const modalContent = modalBody.querySelector('.content');
+            const modalError = modalBody.querySelector('.error-msg');
+            const modalClose = document.getElementById('modalClose');
+            const modalDownload = document.getElementById('modalDownload');
+
+            // ---------- STATE ----------
+            let allNovels = []; // semua novel hasil scan
+            let filteredNovels = []; // hasil filter
+            let currentPage = 'home';
+            let currentNovelFile = null;
+
+            // ---------- THEME ----------
+            function getPreferredTheme() {
+                const stored = localStorage.getItem('novazz-theme');
+                if (stored) return stored;
+                return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+            }
+
+            function setTheme(theme) {
+                document.documentElement.setAttribute('data-theme', theme);
+                localStorage.setItem('novazz-theme', theme);
+                const icon = themeToggle.querySelector('.thumb i');
+                icon.className = theme === 'dark' ? 'fas fa-moon' : 'fas fa-sun';
+            }
+
+            function toggleTheme() {
+                const current = document.documentElement.getAttribute('data-theme');
+                setTheme(current === 'dark' ? 'light' : 'dark');
+            }
+
+            setTheme(getPreferredTheme());
+            themeToggle.addEventListener('click', toggleTheme);
+
+            // ---------- NAVIGASI ----------
+            function navigateTo(page) {
+                currentPage = page;
+                pageHome.classList.add('hidden');
+                pageAbout.classList.add('hidden');
+
+                if (page === 'home') {
+                    pageHome.classList.remove('hidden');
+                    hero.classList.remove('hidden');
+                    btnHome.classList.add('active');
+                    btnAbout.classList.remove('active');
+                } else {
+                    pageAbout.classList.remove('hidden');
+                    hero.classList.add('hidden');
+                    btnAbout.classList.add('active');
+                    btnHome.classList.remove('active');
+                    totalSpan.textContent = allNovels.length;
+                }
+            }
+
+            btnHome.addEventListener('click', () => navigateTo('home'));
+            btnAbout.addEventListener('click', () => navigateTo('about'));
+
+            // ---------- MODAL ----------
+            function openModal(title, fileUrl) {
+                modalTitle.textContent = title;
+                currentNovelFile = fileUrl;
+                modal.classList.add('active');
+                document.body.style.overflow = 'hidden';
+
+                modalLoading.classList.remove('hidden');
+                modalContent.classList.add('hidden');
+                modalError.classList.add('hidden');
+                modalContent.innerHTML = '';
+
+                fetch(fileUrl)
+                    .then(res => {
+                        if (!res.ok) throw new Error('File tidak ditemukan');
+                        return res.arrayBuffer();
+                    })
+                    .then(buffer => mammoth.convertToHtml({ arrayBuffer: buffer }))
+                    .then(result => {
+                        modalLoading.classList.add('hidden');
+                        modalContent.classList.remove('hidden');
+                        modalContent.innerHTML = result.value;
+                        if (result.messages.length) console.warn('Mammoth warnings:', result.messages);
+                    })
+                    .catch(err => {
+                        modalLoading.classList.add('hidden');
+                        modalError.classList.remove('hidden');
+                        modalError.textContent = 'Gagal membaca novel: ' + err.message;
+                        console.error(err);
+                    });
+            }
+
+            function closeModal() {
+                modal.classList.remove('active');
+                document.body.style.overflow = '';
+                modalContent.innerHTML = '';
+                modalError.textContent = '';
+                currentNovelFile = null;
+            }
+
+            modalClose.addEventListener('click', closeModal);
+            modal.addEventListener('click', function(e) {
+                if (e.target === modal) closeModal();
+            });
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && modal.classList.contains('active')) closeModal();
+            });
+
+            modalDownload.addEventListener('click', function() {
+                if (currentNovelFile) window.open(currentNovelFile, '_blank');
+            });
+
+            // ---------- RENDER NOVEL (dengan filter) ----------
+            function renderNovels(novelList) {
+                grid.innerHTML = '';
+                if (!novelList || novelList.length === 0) {
+                    empty.classList.remove('hidden');
+                    grid.classList.add('hidden');
+                    return;
+                }
+                empty.classList.add('hidden');
+                grid.classList.remove('hidden');
+
+                novelList.forEach((novel, index) => {
+                    const card = document.createElement('div');
+                    card.className = 'novel-card';
+                    const delay = Math.min(index * 0.04, 1.2);
+                    card.style.animationDelay = delay + 's';
+
+                    const coverDiv = document.createElement('div');
+                    coverDiv.className = 'cover';
+
+                    const img = document.createElement('img');
+                    img.src = novel.cover;
+                    img.alt = novel.title;
+                    img.loading = 'lazy';
+                    img.onerror = function() {
+                        this.style.display = 'none';
+                        const placeholder = document.createElement('div');
+                        placeholder.className = 'placeholder';
+                        placeholder.innerHTML = `<i class="fas fa-book"></i><span>${novel.title}</span>`;
+                        coverDiv.appendChild(placeholder);
+                    };
+                    coverDiv.appendChild(img);
+
+                    const info = document.createElement('div');
+                    info.className = 'info';
+
+                    const title = document.createElement('div');
+                    title.className = 'title';
+                    title.textContent = novel.title;
+
+                    const badge = document.createElement('span');
+                    badge.className = 'badge';
+                    badge.textContent = '📄 DOCX';
+
+                    const meta = document.createElement('div');
+                    meta.className = 'meta';
+                    meta.innerHTML = `
+                        <span><i class="far fa-file-word"></i> ${novel.fileName}</span>
+                        <span><i class="far fa-eye"></i> Baca</span>
+                    `;
+
+                    info.appendChild(title);
+                    info.appendChild(badge);
+                    info.appendChild(meta);
+
+                    card.appendChild(coverDiv);
+                    card.appendChild(info);
+
+                    card.addEventListener('click', function(e) {
+                        openModal(novel.title, novel.file);
+                    });
+
+                    grid.appendChild(card);
+                });
+
+                totalSpan.textContent = allNovels.length;
+            }
+
+            // ---------- FILTER ----------
+            function filterNovels(keyword) {
+                const q = keyword.toLowerCase().trim();
+                if (!q) {
+                    filteredNovels = allNovels.slice();
+                } else {
+                    filteredNovels = allNovels.filter(n => n.title.toLowerCase().includes(q));
+                }
+                renderNovels(filteredNovels);
+            }
+
+            searchInput.addEventListener('input', function() {
+                filterNovels(this.value);
+            });
+
+            // ---------- SCAN FILE ----------
+            async function scanNovels() {
+                const found = [];
+                const MAX = 500;
+                const promises = [];
+
+                for (let i = 1; i <= MAX; i++) {
+                    const num = i;
+                    const docx = `novel${num}.docx`;
+                    const jpg = `novel${num}.jpg`;
+                    const title = `Novel ${num}`; // ganti dengan array judul jika perlu
+
+                    const p = fetch(docx, { method: 'HEAD' })
+                        .then(res => {
+                            if (res.ok) {
+                                return fetch(jpg, { method: 'HEAD' })
+                                    .then(res2 => {
+                                        if (res2.ok) {
+                                            found.push({ id: num, title, file: docx, cover: jpg, fileName: docx });
+                                        } else {
+                                            found.push({ id: num, title, file: docx, cover: jpg, fileName: docx });
+                                        }
+                                    })
+                                    .catch(() => {
+                                        found.push({ id: num, title, file: docx, cover: jpg, fileName: docx });
+                                    });
+                            }
+                            return null;
+                        })
+                        .catch(() => null);
+
+                    promises.push(p);
+                }
+
+                await Promise.allSettled(promises);
+                found.sort((a, b) => a.id - b.id);
+                allNovels = found;
+                filteredNovels = allNovels.slice();
+                renderNovels(filteredNovels);
+                totalSpan.textContent = allNovels.length;
+
+                if (allNovels.length === 0) {
+                    empty.classList.remove('hidden');
+                    grid.classList.add('hidden');
+                } else {
+                    empty.classList.add('hidden');
+                    grid.classList.remove('hidden');
+                }
+            }
+
+            // ---------- YOUTUBE PLAYER ----------
+            function extractVideoId(url) {
+                // Support berbagai format:
+                // https://www.youtube.com/watch?v=VIDEO_ID
+                // https://youtu.be/VIDEO_ID
+                // https://www.youtube.com/embed/VIDEO_ID
+                // https://youtube.com/shorts/VIDEO_ID
+                const patterns = [
+                    /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/|youtube\.com\/shorts\/)([^&?#]+)/
+                ];
+                for (let p of patterns) {
+                    const match = url.match(p);
+                    if (match) return match[1];
+                }
+                return null;
+            }
+
+            function playYouTube(url) {
+                const id = extractVideoId(url);
+                if (!id) {
+                    alert('URL YouTube tidak valid. Pastikan formatnya benar.');
+                    return;
+                }
+                const embedUrl = `https://www.youtube.com/embed/${id}?autoplay=1&rel=0`;
+                youtubeIframe.src = embedUrl;
+                youtubeContainer.classList.remove('hidden');
+            }
+
+            youtubePlay.addEventListener('click', function() {
+                const url = youtubeUrl.value.trim();
+                if (!url) {
+                    alert('Masukkan URL YouTube terlebih dahulu.');
+                    return;
+                }
+                playYouTube(url);
+            });
+
+            // Enter key di input YouTube
+            youtubeUrl.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    youtubePlay.click();
+                }
+            });
+
+            // ---------- INISIALISASI ----------
+            scanNovels();
+            window.scanNovels = scanNovels;
+
+            console.log('📚 Novazz Novel siap!');
+            console.log('🔍 Cari novel dengan input pencarian.');
+            console.log('▶️ Putar video YouTube dengan URL.');
+
+            // Shortcuts
+            document.addEventListener('keydown', function(e) {
+                if (e.altKey && e.key === 'h') { e.preventDefault();
+                    navigateTo('home'); }
+                if (e.altKey && e.key === 'a') { e.preventDefault();
+                    navigateTo('about'); }
+                if (e.altKey && e.key === 't') { e.preventDefault();
+                    toggleTheme(); }
+            });
+
+        })();
+    </script>
+
+</body>
+</html>
